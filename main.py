@@ -62,12 +62,10 @@ class PasswordManager(Tk):
         self.password_entry.delete(0, END)
 
     @staticmethod
-    def search_result_success(website, emails, passwords):
+    def search_result_success(website, credentials):
         message = f"Your credentials for {website} are:\n\n"
-        n = 0
-        for email in emails:
-            message += f"Email: {email}\nPassword: {passwords[n]}\n\n"
-            n += 1
+        for email in credentials:
+            message += f"Email: {email}\nPassword: {credentials[email]['password']}\n\n"
         messagebox.showinfo(title=website, message=message)
 
     @staticmethod
@@ -121,16 +119,11 @@ class DataModel:
             self.ui.search_result_failure("Please enter a website name.")
             return
 
-        target_emails = []
-        target_passwords = []
-
         try:
             with open(self.path, "r") as data_file:
                 data = json.load(data_file)
-                for email in data[target_website]:
-                    target_emails.append(email)
-                    target_passwords.append(data[target_website][email]['password'])
-            self.ui.search_result_success(target_website, target_emails, target_passwords)
+                credentials = data[target_website]
+            self.ui.search_result_success(target_website, credentials)
         except FileNotFoundError:
             self.ui.search_result_failure("data.json file not found.")
         except KeyError:
